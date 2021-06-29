@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        {{message}}
+        <button @click="changeWord('this is text')">Change Text</button>
+        <hr />
+        <p>First Name: {{firstName}}</p>
+        <input type="text" v-model="firstName">
+
+        <p>Last Name: {{lastName}}</p>
+        <input type="text" @input="textWriting">
+
+        <p :style="len > 2 ? {color: 'red'} : {color: 'black'}">Full Name: {{fullName}}</p>
+        <p>Users list</p>
+        <ul>
+            <li v-for="(user, index) in users" :key="index">
+                {{index}} : {{user.name}} / username: {{user.username}}
+            </li>
+        </ul>
+        <my-component />
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+
+        let MyComponent = {
+            name: 'MyComponent',
+            data() {
+                return {
+                    num: 0
+                }
+            },
+            template: `
+                <div>
+                    <p> {{num}} </p>
+                    <button @click="num++">increase</button>
+                </div>
+            `
+        }
+        const app = new Vue({
+            components: {
+                "my-component": MyComponent
+            },
+            el: '#app',
+            data: {
+                message: 'Hello Vue!',
+                firstName: '',
+                lastName: '',
+                len: 0,
+                users: []
+            },
+            mounted() {
+                axios.get('https://jsonplaceholder.typicode.com/users').then(res => {
+                    this.users = res.data
+                }).catch(err => {
+                    console.log(err.response.data)
+                })
+            },
+            watch: {
+                firstName(newValue, oldValue) {
+                    console.log('oldValue:', oldValue, 'newValue:' + newValue)
+                    this.len = newValue.length
+                }
+            },
+            computed: {
+                fullName() {
+                    return this.firstName + ' ' + this.lastName
+                }
+            },
+            methods: {
+                changeWord(text) {
+                    this.message = text
+                },
+                textWriting(text) {
+                    this.lastName = text.target.value
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
